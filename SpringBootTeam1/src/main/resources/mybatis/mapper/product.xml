@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="euc-kr" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mycompany.webapp.dao.ProductDao">
+   <!-- ResultMap --> 
+   <resultMap type="product" id="productMap">
+      <id property="p_id" column="p_id"/>
+      <result property="p_name" column="p_name"/>
+      <result property="p_rate" column="p_rate"/>       
+      <result property="p_price" column="p_price"/>
+      <result property="p_stock" column="p_stock"/>
+      <result property="p_salescount" column="p_salescount"/>
+      <result property="p_category_name" column="p_category_name"/>
+      <result property="p_upload_date" column="p_upload_date"/>
+      <result property="p_description" column="p_description"/>   
+      
+       
+       <collection property="photolist" ofType="photo">
+          <result property="photo_id" column="photo_id"/>
+         <result property="p_id" column="p_id"/>
+         <result property="photo_oname" column="photo_oname"/>
+         <result property="photo_sname" column="photo_sname"/>
+         <result property="photo_type" column="photo_type"/>
+         <result property="photo_role" column="photo_role"/>
+       </collection>         
+   </resultMap> 
+    
+   
+   
+   
+   <resultMap type="product" id="productDetailMap">
+      <id property="p_id" column="p_id"/>
+      <result property="p_name" column="p_name"/>
+      <result property="p_rate" column="p_rate"/>
+      <result property="p_price" column="p_price"/>
+      <result property="p_stock" column="p_stock"/>
+      <result property="p_salescount" column="p_salescount"/>
+      <result property="p_category_name" column="p_category_name"/>
+      <result property="p_upload_date" column="p_upload_date"/>
+      <result property="p_description" column="p_description"/>   
+      
+      
+       <collection column="p_id" property="photolist" ofType="photo" javaType="List" select="getPhotoList">
+          <id property="photo_id" column="photo_id"/>
+         <result property="p_id" column="p_id"/>
+         <result property="photo_oname" column="photo_oname"/>
+         <result property="photo_sname" column="photo_sname"/>
+         <result property="photo_type" column="photo_type"/>
+         <result property="photo_role" column="photo_role"/>
+       </collection>
+       
+       <collection column="p_id" property="reviewlist" ofType="review" javaType="List" select="getReviewList">
+          <id property="review_id" column="review_id"/> 
+           <result property="review_score" column="review_score"/>
+           <result property="review_title" column="review_title"/>
+           <result property="review_content" column="review_content"/>
+           <result property="review_date" column="review_date"/> 
+         <result property="p_id" column="p_id"/> 
+         <result property="order_id" column="order_id"/>
+         <result property="user_id" column="user_id"/> 
+         <result property="photo_oname" column="photo_oname"/>    
+         <result property="photo_sname" column="photo_sname"/>
+         <result property="photo_type" column="photo_type"/>
+       </collection>
+       
+       
+       <collection column="p_id" property="sizelist" ofType="size" javaType="List" select="getSizeList">
+         <id property="p_size" column="p_size"/> 
+           <id property="p_id" column="p_id"/>
+       </collection>
+         
+   </resultMap> 
+   
+   <select id="getPhotoList" parameterType="int" resultType="photo">
+      select *
+      from photos
+      where p_id=#{p_id}
+    </select>
+   <select id="getReviewList" parameterType="int" resultType="review">
+      select r.review_score, r.review_title, r.review_content, r.review_date, r.p_id,
+       r.user_id, r.photo_oname, r.photo_sname, r.photo_type, r.order_id, u.user_name
+      from review r, users u
+      where r.p_id=#{p_id} and u.user_id = r.user_id 
+    </select>
+   <select id="getSizeList" parameterType="int" resultType="size">
+      select *
+      from size_products
+      where p_id=#{p_id}
+    </select>
+    
+    <select id="selectcurrent"  resultType="int">
+       SELECT MAX(p_id) FROM products p
+   </select>
+    
+    
+       <update id="update" parameterType="product">
+      update products set p_id=#{p_id}, p_name=#{p_name}, p_price=#{p_price}, p_stock=#{p_stock}, p_salescount=#{p_salescount}, p_category_name=#{p_category_name},
+      p_upload_date=sysdate, p_description=#{p_description}
+      where p_id=#{p_id}
+      </update>
+    
+        <update id="updateEnabledBypid" parameterType="int">
+         update products set p_enabled=0
+         where p_id=#{p_id}
+         </update>
+       
+    
+        <delete id="deleteBypid" parameterType="int">
+         delete from products
+         where p_id=#{p_id}
+         </delete>
+         
+         <select id="countSort" resultType="int">
+         select count(*) from products
+         <if test="countSort == '전체'">
+         where p_enabled=1
+         </if>
+         <if test="countSort == '재고부족'">
+         where p_enabled=1 and p_stock=0
+         </if>
+         
+         </select>
+   <!-- 상품 insert / seq로 상품 id-->
+   <insert id="insert" parameterType="product">
+   <selectKey keyProperty="p_id" resultType="int" order="BEFORE">
+      (SELECT NVL(MAX(p_id),0)+1 FROM products p)
+   
+   </selectKey>
+      insert into products
+      (p_id, p_name, p_price, p_stock, p_category_name,p_salescount,
+      p_upload_date, p_description)
+      values
+      (#{p_id}, #{p_name}, #{p_price}, #{p_stock},  #{p_category_name},#{p_salescount},
+      sysdate, #{p_description})
+   </insert>
+   
+ 
+<!-- 상품 뿌려주기 select-->
+   <select id="selectBypid" parameterType="int" resultType="product">
+      select p_id, p_name,p_rate,p_price, p_stock, p_category_name, p_description
+      from products
+      where p_id=#{pid}
+   </select>
+     
+   <select id="selectAllByPager"  resultType="product" resultMap="productMap">
+   
+    select rnum, p_id,p_name,p_rate,p_price,p_category_name, p_upload_date,p_stock, photo_sname, photo_type
+      from (
+          select rownum as rnum,p_id, p_name,p_rate,p_price,p_category_name, p_upload_date,p_stock, photo_sname, photo_type
+          from (
+               select p.p_id,p.p_name,p.p_rate,p.p_price,p.p_category_name, p.p_upload_date,p.p_stock, ph.photo_sname,ph.photo_type 
+              from products p left Join photos ph
+              on p.p_id = ph.p_id and
+              ph.photo_role='main'
+           where p.p_enabled=1
+            <if test="optionVal == '등록순'">
+              order by p.p_id desc
+              </if>
+              <if test="optionVal == '재고순'">
+              order by p.p_stock
+              </if>
+              
+          )
+          where rownum &lt;= #{pager.endRowNo}
+      )
+      where rnum &gt;= #{pager.startRowNo}  
+   </select>
+   
+   <select id="count" resultType="int">
+      select count(*) from products where p_enabled=1
+   </select>
+   
+    <select id="selectRecommandAllByPager" parameterType="pager" resultType="product" resultMap="productMap">
+    
+     select rnum, p_id,p_name,p_rate,p_price, photo_sname, photo_type
+      from (
+          select rownum as rnum,p_id, p_name,p_rate,p_price, photo_sname, photo_type
+          from (
+               select p.p_id,p.p_name,p.p_rate,p.p_price, ph.photo_sname,ph.photo_type 
+              from products p Join photos ph
+              on p.p_id = ph.p_id and
+              ph.photo_role='main'
+          )
+          where rownum &lt;= #{endRowNo}
+      )
+      where rnum &gt;= #{startRowNo}  
+   </select>
+   
+   <select id="recommandcount" resultType="int">
+      select count(*) from products
+   </select>
+
+
+   <select id="selectBestReviewAll" resultType="product" resultMap="productMap">
+      select p.p_id,p.p_name,p_rate,p.p_price, ph.photo_sname,ph.photo_type 
+              from products p Join photos ph
+              on p.p_id = ph.p_id and
+              ph.photo_role='main'
+              order by p_rate desc
+   </select>
+
+   <select id="selectRankAll" resultType="product" resultMap="productMap">
+   select p_id,p_name,p_rate, p_price, photo_sname, photo_type
+   from( select p.p_id, p.p_name,p_rate,p.p_price, ph.photo_sname,ph.photo_type 
+    from products p Join photos ph
+    on p.p_id = ph.p_id and
+    ph.photo_role='main'
+    order by p_salescount desc
+   )
+   where ROWNUM&lt;31
+   
+   
+   </select> 
+   
+   <select id="selectRankCategory" parameterType="string" resultType="product" resultMap="productMap">
+    select p_id,p_name,p_rate, p_price, photo_sname, photo_type
+   from( select p_id,p_name,p_rate, p_price, photo_sname, photo_type, p_category_name
+       from( select p.p_id,p.p_name,p.p_rate,p.p_price, ph.photo_sname,ph.photo_type, p.p_category_name 
+        from products p Join photos ph
+        on p.p_id = ph.p_id and
+        ph.photo_role='main'
+        order by p_salescount desc
+       )
+   where ROWNUM&lt;31
+        )
+   where p_category_name=#{category}
+   </select>
+   
+   
+  <select id="rankcategorycount" parameterType="string" resultType="int">
+ select count(*)
+   from( select *
+       from(select *
+        from products
+        order by p_salescount desc
+       )
+   where ROWNUM&lt;31
+        )
+   where p_category_name=#{category}
+   </select>
+   
+   
+   <select id="selectCategory" resultType="product" resultMap="productMap">
+   select rnum, p_id,p_name,p_rate,p_price, photo_sname, photo_type
+      from (
+          select rownum as rnum, p_id,p_name,p_rate,p_price, photo_sname, photo_type
+          from (
+                  select p.p_id,p.p_name,p.p_rate,p.p_price, ph.photo_sname,ph.photo_type 
+             from products p Join photos ph
+             on p.p_id = ph.p_id and
+             ph.photo_role='main'
+             and p.p_category_name=#{category}
+             order by p_upload_date desc
+          )
+          where rownum &lt;= #{pager.endRowNo}
+      )
+      where rnum &gt;= #{pager.startRowNo} 
+   
+  
+   </select>
+   
+   <select id="categorycount" parameterType="string" resultType="int">
+      select count(*)
+      from products
+      where p_category_name=#{category}
+      </select> 
+   
+   <select id="selectSearchAll" resultType="product" resultMap="productMap">
+   select rnum, p_id,p_name,p_rate,p_price, photo_sname, photo_type
+      from (
+          select rownum as rnum, p_id,p_name,p_rate,p_price, photo_sname, photo_type
+          from (
+                  select p.p_id,p.p_name,p.p_rate,p.p_price, ph.photo_sname,ph.photo_type 
+             from products p Join photos ph
+             on p.p_id = ph.p_id and
+             ph.photo_role='main'
+             and p.p_name like '%'||#{searchword}||'%'
+             order by p_upload_date desc
+          )
+          where rownum &lt;= #{pager.endRowNo}
+      )
+      where rnum &gt;= #{pager.startRowNo} 
+   </select>
+   
+   <select id="searchcount" parameterType="string" resultType="int">
+      select count(*)
+      from products
+      where p_name like '%'||#{searchword}||'%'
+      </select> 
+   
+    <select id="selectSearchCategory" resultType="product" resultMap="productMap">
+   select rnum, p_id,p_name,p_rate,p_price, photo_sname, photo_type
+    from (
+          select rownum as rnum, p_id,p_name,p_rate,p_price, photo_sname, photo_type
+          from (
+                  select p.p_id,p.p_name,p.p_rate,p.p_price, ph.photo_sname,ph.photo_type 
+             from products p Join photos ph
+             on p.p_id = ph.p_id and
+             ph.photo_role='main'
+             and p.p_name like '%'||#{searchword}||'%' and p_category_name=#{category}
+             order by p_upload_date desc
+          )
+          where rownum &lt;= #{pager.endRowNo}
+      )
+      where rnum &gt;= #{pager.startRowNo} 
+      </select>
+      
+      <select id="searchcategorycount"  resultType="int">
+      select count(*)
+      from products
+      where p_name like '%'||#{searchword}||'%' and p_category_name=#{category}
+      </select> 
+       
+       
+       <select id="selectProductDetail" parameterType="int" resultMap="productDetailMap">
+      select *
+   from products
+   where p_id=#{pid}
+      </select>
+       
+       
+      <!-- <select id="selectProductDetail" parameterType="int" resultMap="productDetailMap">
+      select p.p_name, p.p_price, p.p_stock, p.p_category_name, p.p_description, ph.photo_sname, ph.photo_oname, ph.photo_type, ph.photo_role,
+   rv.review_content, rv.review_date, rv.review_score,rv.review_title,
+   sp.p_size
+   from products p ,photos ph, review rv, size_products sp
+   where p.p_id=#{pid} and p.p_id = ph.p_id and p.p_id = rv.p_id and p.p_id = sp.p_id
+      </select> -->
+     <update id="updateRate" >
+      update products set p_rate=#{p_rate}
+      where p_id=#{p_id}
+    </update>
+      
+      
+   
+      
+      <update id="updateSalescountAndStock" parameterType="int">
+      update products set salescount=salescount+1, p_stock=p_stock-1
+      where p_id=#{pid}
+      </update>
+    
+
+   
+   
+</mapper>

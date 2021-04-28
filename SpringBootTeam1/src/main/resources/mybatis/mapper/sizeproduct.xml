@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="euc-kr" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mycompany.webapp.dao.SizeProductDao">
+
+    
+   <insert id="insertSize" parameterType="size">
+      insert into size_products
+      (p_id, p_size)
+      values
+      (#{p_id}, #{p_size})
+   </insert>
+    
+   <delete id="deleteSizeByPid" parameterType="int">
+       delete from size_products
+         where p_id=#{p_id}
+   </delete>
+</mapper>

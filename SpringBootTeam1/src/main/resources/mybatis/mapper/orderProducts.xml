@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mycompany.webapp.dao.OrderProductsDao">
+ 
+   <select id="productList" parameterType="orderproduct" resultType="orderproduct">
+		select 	
+						o.amount,
+						o.p_id,
+						p.p_name,  
+						p.p_price, 
+						photos.photo_id,
+						photos.photo_oname, 
+						photos.photo_sname, 
+						photos.photo_type, 
+						photos.photo_role
+		from  order_products o, products p, photos
+		where	 o.order_id = #{order_id} and
+					 o.p_id = p.p_id and
+					 p.p_id = photos.p_id and
+					 photos.photo_role = 'main'
+
+	</select>
+	
+	 <delete id="deleteByOrderProduct" parameterType="String">
+      delete from order_products where order_id=#{order_id}
+   </delete>
+   
+</mapper>

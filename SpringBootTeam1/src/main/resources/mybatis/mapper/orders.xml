@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="euc-kr" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mycompany.webapp.dao.OrdersDao">
+ 
+ 	<update id="updateStatus" parameterType="String">
+		update orders 
+		set delivery_status=#{delivery_status}
+		where order_id=#{order_id}
+	</update>
+	
+   <select id="orderSelectByAll" parameterType="int" resultType="orders">
+      select *
+      from orders
+   </select>
+   
+   <select id="orderSelectByOne" parameterType="String" resultType="orders">
+      select    order_id,
+            order_name,
+            order_phone,
+            order_date,
+            delivery_status,
+            order_request,
+            delivery_address,
+            delivery_address_detail,
+            payment,
+            total_price,
+            order_sprice
+      from orders
+      where order_id = #{order_id}      
+   </select>
+   
+   
+   <!-- 주문내역 리스트 가져오기 -->
+   	 <select id="orderListByPage" parameterType="pager" resultType="orders">
+		select rnum, user_id,order_name,total_price, order_id, order_date, delivery_status, total_amount
+		from(
+			select 	rownum as rnum, 
+					user_id,
+					order_name,
+					total_price,
+				  	order_id,
+                  	order_date,
+                  	delivery_status,
+                  	total_amount
+                
+			from (
+					select 
+							o.user_id,
+							o.order_name,
+							o.total_price,
+							o.order_id,
+		                  	o.order_date,
+		                  	o.delivery_status,
+		                  	o.total_amount
+					from orders o 
+					<if test="keyword == null and status==null">
+					</if>
+					<if test="keyword !=null and status ==null">
+					where order_name like '%' || #{keyword} || '%'
+					</if>
+					<if test="keyword == null and status !=null">
+					where delivery_status = #{status}
+					</if>
+					<if test="keyword != null and status !=null">
+					where order_name like '%' || #{keyword} || '%' and delivery_status = #{status}
+					</if>
+                	order by o.order_date desc
+				)
+			where rownum &lt;=#{pager.endRowNo}
+				)
+		where rnum &gt;=#{pager.startRowNo}
+				
+	</select> 
+	
+	<!-- 주문내역 리스트 카운트 -->
+	<select id="count" resultType="int">
+      select count(*)
+      from orders
+      <if test="keyword == null and status==null">
+	  </if>
+	  <if test="keyword !=null and status ==null">
+	  where order_name like '%' || #{keyword} || '%'
+	  </if>
+	  <if test="keyword == null and status !=null">
+	  where delivery_status = #{status}
+	  </if>
+	  <if test="keyword != null and status !=null">
+	  where order_name like '%' || #{keyword} || '%' and delivery_status = #{status}
+	  </if>
+	  </select> 
+	  
+	  <select id="readycount" resultType="int">
+	  select count(*)
+	  from orders
+	  where delivery_status ='배송준비중'
+	  </select>
+	  
+	  <delete id="deleteByoid" parameterType="String">
+      delete from orders where order_id=#{order_id}
+   </delete>
+ 
+  	
+
+	
+   
+
+   
+</mapper>
