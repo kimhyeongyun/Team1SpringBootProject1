@@ -10,9 +10,9 @@ public class Product {
  
 
 
-private int p_id;
-private String p_name;
-private int p_rate;
+	private int p_id;
+	private String p_name;
+	private int p_rate;
    private int p_price;
    private int p_stock;
    private int p_salescount;

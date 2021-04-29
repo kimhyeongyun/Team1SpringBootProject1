@@ -144,13 +144,7 @@ public class ProductsController {
    // @RequestBody : 요청 http 본문에 json이 포함되어 있을 경우 raw type:json
    public Product update(Product product) { 
       productService.UpdateProduct(product);
-      System.out.println(product);
-      
-      
-      System.out.println("------------------------------------------");
-      //   System.out.println(product.getP_mainphoto().getOriginalFilename());
-
-         //System.out.println(product.getP_detailphoto().getOriginalFilename());
+ 
       //이전에 있던 사진들을 다지우고
       if(product.getPhoto_ids()!=null) {
          for(int i=0;i<product.getPhoto_ids().length; i++) {
@@ -159,7 +153,6 @@ public class ProductsController {
            }   
       }
 
-      System.out.println("------------------------------------------");
       // 새로 업데이트한 사진들을 추가함
       if (product.getP_mainphoto()!= null && !product.getP_mainphoto().isEmpty()) {
          
