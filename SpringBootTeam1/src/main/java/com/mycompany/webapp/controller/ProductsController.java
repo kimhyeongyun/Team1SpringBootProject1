@@ -39,7 +39,7 @@ public class ProductsController {
    private ProductService productService; 
    
    @GetMapping("")
-   public Map<String, Object> list(@RequestParam(defaultValue="1") int pageNo,@RequestParam(defaultValue="등록순") String optionVal) {
+   public Map<String, Object> list(@RequestParam(defaultValue="1") int pageNo,@RequestParam(defaultValue="번호순") String optionVal) {
       System.out.println("optoin" + optionVal);
       int totalRows = productService.getProductsCount();
       Pager pager = new Pager(5, 5, totalRows, pageNo);

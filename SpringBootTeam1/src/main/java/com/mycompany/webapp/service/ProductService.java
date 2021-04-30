@@ -113,30 +113,30 @@ public class ProductService {
    public void RemoveProduct(int pid) {
       System.out.println("delete : " + pid);
       // 사진 삭제
-      List<Photo> photos = photosDao.selectByPid(pid);
-      File file=null;
-      for(Photo p:photos) {
-         if(p.getPhoto_role().equals("main")) {
-            file = new File("C:/Photos/ProductPhotos/Main/" + p.getPhoto_sname() );
-            }
-         else if(p.getPhoto_role().equals("sub")) {
-            file = new File("C:/Photos/ProductPhotos/Sub/" + p.getPhoto_sname() );
-            
-         }
-         else if(p.getPhoto_role().equals("detail")) {
-            file = new File("C:/Photos/ProductPhotos/Detail/" + p.getPhoto_sname() );
-         }
-         
-         if( file.exists() ){
-            if(file.delete())
-            { System.out.println("파일삭제 성공"); }
-            else{ System.out.println("파일삭제 실패"); } 
-            }
-            else{ System.out.println("파일이 존재하지 않습니다."); }
-            
-         
-         }
-      photosDao.deleteByPid(pid);
+//      List<Photo> photos = photosDao.selectByPid(pid);
+//      File file=null;
+//      for(Photo p:photos) {
+//         if(p.getPhoto_role().equals("main")) {
+//            file = new File("C:/Photos/ProductPhotos/Main/" + p.getPhoto_sname() );
+//            }
+//         else if(p.getPhoto_role().equals("sub")) {
+//            file = new File("C:/Photos/ProductPhotos/Sub/" + p.getPhoto_sname() );
+//            
+//         }
+//         else if(p.getPhoto_role().equals("detail")) {
+//            file = new File("C:/Photos/ProductPhotos/Detail/" + p.getPhoto_sname() );
+//         }
+//         
+//         if( file.exists() ){
+//            if(file.delete())
+//            { System.out.println("파일삭제 성공"); }
+//            else{ System.out.println("파일삭제 실패"); } 
+//            }
+//            else{ System.out.println("파일이 존재하지 않습니다."); }
+//            
+//         
+//         }
+//      photosDao.deleteByPid(pid);
       
       //사이즈 삭제
       sizeProductDao.deleteSizeByPid(pid);
