@@ -38,8 +38,10 @@ public class OrderController {
 	
 	@GetMapping("")
 	public Map<String,Object> list(@RequestParam(defaultValue="1") int pageNo, String keyword, String searchStatus){
-		logger.info(keyword);
-		logger.info(searchStatus);
+		String all = "전체";
+		if(searchStatus.equals(all)) {
+			searchStatus=null;
+		}
 		int totalRows = ordersService.getTotalRows(keyword,searchStatus);
 		Pager pager = new Pager(10,5,totalRows,pageNo);
 		List<Orders> list = ordersService.getOrdersList(pager,keyword,searchStatus);
@@ -72,7 +74,7 @@ public class OrderController {
 	
 	@PutMapping("")
 	public Orders update(@RequestBody Orders orders) {
-		ordersService.deleteOrder(orders);
+		ordersService.updateStatus(orders);
 		return orders;
 	}
 	

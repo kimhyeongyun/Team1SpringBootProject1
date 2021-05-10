@@ -8,10 +8,6 @@
 		where order_id=#{order_id}
 	</update>
 	
-   <select id="orderSelectByAll" parameterType="int" resultType="orders">
-      select *
-      from orders
-   </select>
    
    <select id="orderSelectByOne" parameterType="String" resultType="orders">
       select    order_id,
