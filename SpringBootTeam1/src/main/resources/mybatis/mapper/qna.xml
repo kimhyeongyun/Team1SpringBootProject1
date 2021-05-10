@@ -2,68 +2,58 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.mycompany.webapp.dao.QnaDao">
 
-   <select id="selectAllByUserId" parameterType="string"
-      resultType="qna">
-      select qa_id, qa_category, qa_content, qa_status, qa_date, qa_cn, user_id,
-      qa_cn, user_id
-      from QNA
-      where user_id = #{user_id}
+    <select id="selectByPage" parameterType="map" resultType="qna">
+      select rnum, qa_id, qa_category, qa_content, qa_status, qa_date, qa_cn, user_id
+      from (
+      		select rownum as rnum, qa_id, qa_category, qa_content, qa_status, qa_date, qa_cn, user_id
+     		 from (
+      				select qa_id, qa_category, qa_content, qa_status, qa_date, qa_cn, user_id
+      				from QNA
+ 
+      				<if test="keyword != null and qa_category == '전체'">
+      				 where	user_id like '%' || #{keyword} || '%'
+      				</if> 
+ 					<if test="keyword == null and (qa_category == '상품 문의' or qa_category == '배송 문의' or qa_category == '주문/결제 문의')">
+        			 where qa_category = #{qa_category}
+      				</if>			
+ 					<if test="keyword == null and (qa_category == '답변 대기' or qa_category == '답변 완료')">
+				     where qa_status = #{qa_category}
+				    </if>
+				    <if test="keyword != null and (qa_category == '배송 문의' or qa_category == '주문/결제 문의' or qa_category == '상품 문의')">
+        			 where
+        			 user_id like '%' || #{keyword} || '%' and 
+        			 qa_category = #{qa_category}
+      				</if>
+					<if test="keyword != null and (qa_category == '답변 대기' or qa_category == '답변 완료')">
+				     where
+				     user_id like '%' || #{keyword} || '%' and 
+				     qa_status = #{qa_category}
+				    </if> 
+      					order by qa_id desc
+      				)
+     		 where rownum &lt;= #{pager.endRowNo}
+     	 )
+      where rnum &gt;= #{pager.startRowNo}
    </select>
-
+   
    <select id="selectByQa_id" resultType="qna">
       select qa_id, qa_category, qa_content, qa_status, qa_date, qa_cn, user_id,
       qa_cn, user_id, qa_answer, qa_admin
       from QNA
       where qa_id=#{qa_id}
    </select>
-
-   <select id="selectByPage" parameterType="map" resultType="qna">
-      select rnum, qa_id, qa_category, qa_content, qa_status, qa_date,
-      qa_cn, user_id
-      from (
-      select rownum as rnum, qa_id, qa_category, qa_content, qa_status, qa_date,
-      qa_cn, user_id
-      from (
-      select qa_id, qa_category, qa_content, qa_status, qa_date, qa_cn, user_id
-      from QNA
-      <if test="qa_category == '배송 문의' or qa_category == '주문/결제 문의' or qa_category == '상품 문의'">
-         where qa_category = #{qa_category}
-      </if>
-      <if test="qa_category == '답변 대기' or qa_category == '답변 완료' ">
-         where qa_status = #{qa_category}
-      </if>
-
-      order by qa_id desc
-      )
-      where rownum &lt;= #{pager.endRowNo}
-      )
-      where rnum &gt;= #{pager.startRowNo}
-   </select>
-
-
-   <insert id="insert" parameterType="qna">
-      <selectKey keyProperty="qa_id" resultType="int"
-         order="BEFORE">
-         select seq_qna_qno.nextval from dual
-      </selectKey>
-      insert into qna
-      (qa_id, qa_category, qa_content, qa_status, qa_date, qa_cn, user_id,
-      qa_answer, qa_admin)
-      values
-      (#{qa_id}, #{qa_category}, #{qa_content}, '답변 대기', sysdate, 7, #{user_id},
-      #{qa_answer}, #{qa_admin})
-   </insert>
-
+   
    <update id="update" parameterType="qna">
-      update qna set
-      qa_id=#{qa_id},
-      qa_category=#{qa_category},
-      qa_content=#{qa_content},
-      qa_status=#{qa_status},
-      qa_cn=#{qa_cn},
-      user_id=#{user_id},
-      qa_answer=#{qa_answer},
-      qa_admin=#{qa_admin}
+      update qna 
+      set
+	      qa_id=#{qa_id},
+	      qa_category=#{qa_category},
+	      qa_content=#{qa_content},
+	      qa_status=#{qa_status},
+	      qa_cn=#{qa_cn},
+	      user_id=#{user_id},
+	      qa_answer=#{qa_answer},
+	      qa_admin=#{qa_admin}
 
       where qa_id=#{qa_id}
    </update>
@@ -71,28 +61,34 @@
    <delete id="deleteByQa_id">
       delete from QNA
       where qa_id=#{qa_id}
-
    </delete>
 
-   <select id="selectByUserid" parameterType="string"
-      resultType="user">
-      select user_id, user_name, user_password, user_phone, dog_size, enabled,
-      authority
-      from users
-      where user_id=#{user_id}
-   </select>
-
+   <!-- 해당 카테고리/상태에 맞는 문의글 개수 count  -->
    <select id="countuser" resultType="int">
       select count(*)
       from qna
-      <if test="qa_category == '배송 문의' or qa_category == '주문/결제 문의' or qa_category == '상품 문의'">
-         where qa_category = #{qa_category}
-      </if>
-      <if test="qa_category == '답변 대기' or qa_category == '답변 완료' ">
-         where qa_status = #{qa_category}
-      </if>
+       	<if test="keyword != null and qa_category == '전체'">
+      		where user_id like '%' || #{keyword} || '%'
+      	</if> 
+ 		<if test="keyword == null and (qa_category == '상품 문의' or qa_category == '배송 문의' or qa_category == '주문/결제 문의')">
+     		where qa_category = #{qa_category}
+   		</if>			
+		<if test="keyword == null and (qa_category == '답변 대기' or qa_category == '답변 완료')">
+	     	where qa_status = #{qa_category}
+	    </if>
+	    <if test="keyword != null and (qa_category == '배송 문의' or qa_category == '주문/결제 문의' or qa_category == '상품 문의')">
+     		where
+     			user_id like '%' || #{keyword} || '%' and 
+     			qa_category = #{qa_category}
+   		</if>
+		<if test="keyword != null and (qa_category == '답변 대기' or qa_category == '답변 완료')">
+		     where
+			     user_id like '%' || #{keyword} || '%' and 
+			     qa_status = #{qa_category}
+		</if>
    </select>
    
+   <!-- 답변 대기 상태의 문의글 개수만 count -->
    <select id="countwait" resultType="int">
       select count(*) 
       from qna

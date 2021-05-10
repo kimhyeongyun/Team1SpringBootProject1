@@ -20,8 +20,16 @@ import com.mycompany.webapp.dto.User;
 public class QnaService {
    @Autowired
    private QnaDao qnaDao;
-
-
+   
+   public List<Qna> getBoardList(Pager pager, String qa_category, String keyword) {
+      Map<String, Object> map = new HashMap<>();
+      map.put("keyword", keyword);
+      map.put("pager", pager);
+      map.put("qa_category", qa_category);
+      List<Qna> list = qnaDao.selectByPage(map);
+      return list; 
+   }
+   
    public Qna getQna(int qa_id) {
       Qna qna = qnaDao.selectByQa_id(qa_id);
       return qna;
@@ -34,26 +42,10 @@ public class QnaService {
    public void deleteQna(int qa_id) {
       qnaDao.deleteByQa_id(qa_id);
    }
-   
-   public void insertQna(Qna qna) {
-      qnaDao.insert(qna);
-   }
-   
-//   public List<Qna> getBoardList(){
-//         List<Qna> list = qnaDao.selectAll();
-//         return list;
-//   }
- 
-   public List<Qna> getBoardList(Pager pager, String qa_category) {
-      Map<String, Object> map = new HashMap<>();
-      map.put("pager", pager);
-      map.put("qa_category", qa_category);
-      List<Qna> list = qnaDao.selectByPage(map);
-       return list; 
-   }
 
-   public int getTotalRows(String qa_category) {
-       int rows = qnaDao.countuser(qa_category);
+
+   public int getTotalRows(String qa_category, String keyword) {
+       int rows = qnaDao.countuser(qa_category, keyword);
        return rows;
     }
    
@@ -62,5 +54,5 @@ public class QnaService {
 	   return waitrows;
    }
 
-   
+ 
 }

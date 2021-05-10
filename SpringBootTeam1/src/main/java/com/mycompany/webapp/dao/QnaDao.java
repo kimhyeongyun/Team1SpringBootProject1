@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.mycompany.webapp.dto.Qna;
 
@@ -11,12 +12,11 @@ import com.mycompany.webapp.dto.Qna;
 
 @Mapper
 public interface QnaDao {
-   public int insert(Qna qna);
+   public List<Qna> selectByPage(Map<String, Object> map);
    public Qna selectByQa_id(int qa_id);
    public int update(Qna qna);
    public int deleteByQa_id(int qa_id);
-   public List<Qna> selectByPage(Map<String, Object> map);
-   public int countuser(String qa_category);
+   public int countuser(@Param("qa_category")String qa_category, @Param("keyword")String keyword);
    public int countwait();
 
 }
