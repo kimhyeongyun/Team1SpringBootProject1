@@ -47,13 +47,6 @@ public class ProductService {
       }
 
    }
-
-   //리뷰 저장하기
-   public void createReview(Review review) {
-      reviewDao.insertReview(review);
-   }
-
-
    //Read   
    //특정 상품 가져오기
    public int getCurrentProductID() {
