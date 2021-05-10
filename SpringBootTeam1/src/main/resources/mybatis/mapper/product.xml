@@ -152,7 +152,7 @@
               on p.p_id = ph.p_id and
               ph.photo_role='main'
            where p.p_enabled=1
-            <if test="optionVal == '전체'">
+            <if test="optionVal == '번호순'">
               order by p.p_id desc
               </if>
               <if test="optionVal == '재고순'">
